@@ -67,10 +67,3 @@ El laboratorio del ERP (`pnpm wp:lab` en crm-erp) instala este plugin desde `../
    `https://github.com/codegeaec/nimbus-erp-for-woocommerce/releases/latest/download/nimbus-erp-for-woocommerce.zip`.
 
 Licencia GPL v2 o posterior (requisito del directorio de WordPress.org; ver `readme.txt` y `LICENSE`).
-
-## Ícono, banner y capturas de WordPress.org
-
-`.wordpress-org/` tiene los archivos de la ficha del directorio (`icon-128x128.png`, `icon-256x256.png`, `icon.svg`,
-`banner-772x250.png`, `banner-1544x500.png`, `screenshot-1..5.png`, en el orden de `== Screenshots ==` del `readme.txt`).
-No van en el zip del plugin (`export-ignore`): se suben a la carpeta `assets/` del SVN de WordPress.org, a mano o con la
-acción `10up/action-wordpress-plugin-deploy`, que los toma de esta carpeta.
