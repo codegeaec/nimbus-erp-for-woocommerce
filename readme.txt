@@ -5,7 +5,7 @@ Requires at least: 6.4
 Tested up to: 7.1
 Requires PHP: 7.4
 Requires Plugins: woocommerce
-Stable tag: 1.2.1
+Stable tag: 1.2.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -106,6 +106,9 @@ No. Version 1.2.0 copies the connection, warehouse and send log of the old plugi
 5. Log: the last sends to the ERP with their result, to diagnose problems at a glance.
 
 == Changelog ==
+
+= 1.2.2 =
+* Stock changes sent to the ERP carry the time they were read, so a late or retried update can no longer overwrite a newer stock value.
 
 = 1.2.1 =
 * Settings screens with the Nimbus look: logo, orange accent on tabs, buttons and options.

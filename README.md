@@ -44,7 +44,8 @@ Todas las llamadas son `POST {ERP}/api/plugins/wordpress/webhook/<endpoint>` con
 - `ping` → `{ company, tenant, warehouses[{ id, code, name, is_main }], stock_warehouse_id, orders_require_review, newsletter }`
 - `orders` → ver `Nimbus_ERP_Orders::payload()` (montos sin impuestos + tasa cobrada por línea, total del pedido,
   `order_mode`, `warehouse_id`, `coupons: [{ code, discount }]` para que Fidelidad cuente los usos).
-- `stock` → `{ items: [{ sku, stock }], warehouse_id }`
+- `stock` → `{ items: [{ sku, stock, changed_at }], warehouse_id, sent_at }` (`sent_at`/`changed_at` en milisegundos:
+  el ERP descarta un aviso más viejo que el último aplicado para ese SKU)
 - `newsletter` → `{ email, name, consent, consent_text, ip }` (IP del cliente) → `{ ok, message }`. El ERP deja
   el contacto «Por confirmar» y le manda el correo de confirmación (doble opt-in).
 

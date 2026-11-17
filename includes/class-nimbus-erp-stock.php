@@ -10,6 +10,9 @@ if (!defined('ABSPATH')) {
  *   descontaría dos veces);
  * - los cambios que hace el propio ERP por la API REST (header X-Nimbus-Erp): volverían al ERP sin cambios.
  * El ERP ajusta la bodega elegida (pestaña Stock) al valor que tiene la tienda.
+ *
+ * Cada aviso lleva `sent_at` (milisegundos) del momento en que se leyó el stock: si dos avisos del mismo producto
+ * llegan al ERP fuera de orden (reintento, cola lenta), el ERP descarta el más viejo en vez de pisar el valor nuevo.
  */
 final class Nimbus_ERP_Stock {
 	const ACTION = 'nimbus_erp_send_stock';
@@ -68,9 +71,12 @@ final class Nimbus_ERP_Stock {
 		if (!$product || !$product->get_sku()) {
 			return;
 		}
+		// Leído recién ahora (no al editar): el valor y su marca de tiempo corresponden al mismo instante.
+		$read_at = (int) round(microtime(true) * 1000);
 		$data = array(
-			'items' => array(array('sku' => $product->get_sku(), 'stock' => (float) $product->get_stock_quantity())),
+			'items' => array(array('sku' => $product->get_sku(), 'stock' => (float) $product->get_stock_quantity(), 'changed_at' => $read_at)),
 			'warehouse_id' => (int) Nimbus_ERP_Settings::get('warehouse_id') ?: null,
+			'sent_at' => $read_at,
 		);
 		$result = Nimbus_ERP_Client::post('stock', $data);
 		Nimbus_ERP_Log::add('stock', $product->get_sku(), $result['ok'], $result['ok'] ? 'Stock ' . $product->get_stock_quantity() : $result['error']);
