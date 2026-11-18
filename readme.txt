@@ -1,5 +1,5 @@
 === Nimbus ERP for WooCommerce ===
-Contributors: dpintoec, codegea
+Contributors: dpintoec
 Tags: woocommerce, erp, inventory, orders, invoicing
 Requires at least: 6.4
 Tested up to: 7.1
