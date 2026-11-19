@@ -19,7 +19,7 @@ Conecta una tienda **WooCommerce** con **Nimbus ERP**: los pedidos pagados llega
 | Dirección | Qué viaja | Cómo |
 |---|---|---|
 | Tienda → ERP | Pedidos pagados | Este plugin (webhook firmado, reintentos con Action Scheduler) |
-| Tienda → ERP | Stock cambiado a mano en WooCommerce (opcional) | Este plugin |
+| Tienda → ERP | Stock cambiado a mano en WooCommerce (opcional), como diferencia | Este plugin (webhook firmado, reintentos con Action Scheduler) |
 | Tienda → ERP | Suscripciones al newsletter (casilla del checkout y shortcode, opcional) | Este plugin; el ERP manda la confirmación |
 | ERP → Tienda | Productos, precios, stock, marcas, categorías, tags, fotos | El ERP, por la API REST de WooCommerce |
 
@@ -44,8 +44,10 @@ Todas las llamadas son `POST {ERP}/api/plugins/wordpress/webhook/<endpoint>` con
 - `ping` → `{ company, tenant, warehouses[{ id, code, name, is_main }], stock_warehouse_id, orders_require_review, newsletter }`
 - `orders` → ver `Nimbus_ERP_Orders::payload()` (montos sin impuestos + tasa cobrada por línea, total del pedido,
   `order_mode`, `warehouse_id`, `coupons: [{ code, discount }]` para que Fidelidad cuente los usos).
-- `stock` → `{ items: [{ sku, stock, changed_at }], warehouse_id, sent_at }` (`sent_at`/`changed_at` en milisegundos:
-  el ERP descarta un aviso más viejo que el último aplicado para ese SKU)
+- `stock` → `{ items: [{ sku, delta, change_id }], warehouse_id }` → `{ ok, updated, replayed[], skipped[] }`. `delta`
+  es cuánto cambió (de 5 a 8 es `3`) y el ERP lo suma a su stock: no pisa lo que el ERP movió mientras tanto.
+  `change_id` (UUID) es uno por cambio y se repite en los reintentos: el ERP no aplica dos veces el mismo. Las
+  versiones anteriores a 1.3.0 mandaban `stock` (el valor) con `changed_at`; el ERP los sigue aceptando.
 - `newsletter` → `{ email, name, consent, consent_text, ip }` (IP del cliente) → `{ ok, message }`. El ERP deja
   el contacto «Por confirmar» y le manda el correo de confirmación (doble opt-in).
 

@@ -57,7 +57,7 @@ foreach ($warehouses as $w) {
 	<label class="cerp-check">
 		<input type="checkbox" name="stock_to_erp" value="1" <?php checked($s['stock_to_erp'], 'yes'); ?>>
 		<span><strong>Pasar al ERP los cambios de stock hechos a mano en WooCommerce</strong>
-			<small>Útil mientras el inventario se siga llevando en la tienda. Los descuentos por pedidos no se pasan: el ERP ya los descuenta al recibir el pedido.</small></span>
+			<small>Útil mientras el inventario se siga llevando en la tienda. Se pasa cuánto cambió (+3, −2), no el valor: una venta del ERP que la tienda todavía no recibió no se pisa. Los descuentos por pedidos no se pasan: el ERP ya los descuenta al recibir el pedido.</small></span>
 	</label>
 </section>
 <p class="cerp-actions"><button type="submit" class="button button-primary">Guardar</button></p>
