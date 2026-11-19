@@ -6,3 +6,8 @@ if (!defined('WP_UNINSTALL_PLUGIN')) {
 delete_option('nimbus_erp_settings');
 delete_option('nimbus_erp_info');
 delete_option('nimbus_erp_log');
+
+// Envíos al ERP que quedaron en la cola de Action Scheduler (pedidos, stock, newsletter).
+if (function_exists('as_unschedule_all_actions')) {
+	as_unschedule_all_actions('', array(), 'nimbus-erp-for-woocommerce');
+}
