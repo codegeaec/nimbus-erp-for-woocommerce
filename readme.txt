@@ -5,7 +5,7 @@ Requires at least: 6.4
 Tested up to: 7.1
 Requires PHP: 7.4
 Requires Plugins: woocommerce
-Stable tag: 1.2.2
+Stable tag: 1.3.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -22,13 +22,14 @@ Products, prices, photos, brands, categories and stock travel from the ERP to th
 * Every paid order is sent to the ERP as a sale. You choose how it arrives: **as a draft** to review, **as a confirmed sale** (stock is deducted) or **confirmed and invoiced**.
 * Taxes (VAT), coupons and shipping are sent exactly as charged, so the ERP sale adds up to what the customer paid.
 * Choose which order statuses send the order (Processing, Completed, On hold). An order placed by bank transfer arrives as a draft and is confirmed when it is paid — never duplicated.
-* Re-send any order from its screen: *Order actions → Send to ERP*.
+* Re-send any order from its screen: *Order actions → Enviar al ERP*.
 
 = Stock you can trust =
 
-* The store shows the stock of the ERP warehouse you pick (main store, branch…).
-* Sales, purchases and adjustments in the ERP reach the store within a minute.
-* Optionally, stock changes made by hand in WooCommerce are passed back to the ERP. Changes made by the ERP are never sent back, so there are no loops.
+* Pick the ERP warehouse (main store, branch…) that store orders are taken from.
+* Optionally, stock changes made by hand in WooCommerce (editing a product, a CSV import) are passed back to the ERP. The plugin sends the change (+3, −2), not the new value, so a sale made in the ERP that the store has not received yet is never overwritten. Each change is applied only once, even when it is retried.
+* Stock reductions caused by orders and changes made by the ERP itself are never sent back, so nothing is counted twice and there are no loops.
+* Sales, purchases and adjustments made in the ERP reach the store within a minute. This is done by Nimbus ERP through the WooCommerce REST API when stock sync is turned on in the ERP, not by this plugin.
 
 = Newsletter signups =
 
@@ -38,7 +39,8 @@ Products, prices, photos, brands, categories and stock travel from the ERP to th
 
 = Built to be reliable =
 
-* Sends run in the background with Action Scheduler (bundled with WooCommerce) and are retried automatically if the ERP does not answer.
+* Orders, stock changes and newsletter signups are sent in the background with Action Scheduler (bundled with WooCommerce), so the checkout never waits for the ERP.
+* If the ERP does not accept a send, orders and stock changes are retried after 1, 5, 15, 60 and 180 minutes, and newsletter signups after 1, 5 and 15 minutes when the ERP does not answer.
 * Every request is signed with HMAC-SHA256 using a secret shared with your ERP.
 * A send log with the last 50 operations helps you diagnose problems without server access.
 * Compatible with WooCommerce High-Performance Order Storage (HPOS).
@@ -56,7 +58,7 @@ This plugin connects to the **Nimbus ERP** instance configured by the store owne
 
 * **What is sent and when**
   * When an order reaches one of the selected statuses: order number, status, payment method, currency, billing name, email, phone and tax ID, line items (SKU, quantity, prices, discount, tax rate), coupons used, shipping and total, and the customer note.
-  * When stock is changed by hand in WooCommerce (only if enabled): product SKU and new stock quantity.
+  * When stock is changed by hand in WooCommerce (only if enabled): product SKU, how much the stock changed and a random ID for that change.
   * When a customer ticks the newsletter checkbox at checkout or submits the newsletter form (only if used): email, name, the consent text they accepted and their IP address.
   * When testing the connection: the store URL and the plugin version.
 * **Where**: `{ERP address}/api/plugins/wordpress/webhook/{ping|orders|stock|newsletter}`, signed with HMAC-SHA256 using the shared secret.
@@ -67,7 +69,7 @@ This plugin connects to the **Nimbus ERP** instance configured by the store owne
 1. Install and activate the plugin (WooCommerce must be active).
 2. In Nimbus ERP, open *Configuración → Plugins → WordPress / WooCommerce → Pedidos* and copy the ERP address and the secret.
 3. In WordPress, go to *WooCommerce → Nimbus ERP → Conexión*, paste them and click «Conectar con el ERP».
-4. In the *Pedidos* and *Stock* tabs, choose how orders arrive and which ERP warehouse feeds the store.
+4. In the *Pedidos* and *Stock* tabs, choose how orders arrive and which ERP warehouse they are taken from.
 
 That's it: the next paid order shows up in the ERP.
 
@@ -87,7 +89,7 @@ No. Stock reductions caused by orders are not sent: the ERP deducts them when it
 
 = What happens if the ERP is offline? =
 
-Orders and stock changes wait in the queue and are retried automatically. You can see every attempt in the *Registro* tab.
+Orders, stock changes and newsletter signups wait in the queue and are retried automatically (see *Built to be reliable* above for the schedule). You can see every attempt in the *Registro* tab.
 
 = Can the ERP issue the electronic invoice? =
 
@@ -101,11 +103,16 @@ No. Version 1.2.0 copies the connection, warehouse and send log of the old plugi
 
 1. Connection: paste the ERP address and secret once and see which company and warehouse the store works with.
 2. Orders: choose whether a paid order arrives as a draft, a confirmed sale or a confirmed and invoiced sale, and which statuses send it.
-3. Stock: pick the ERP warehouse that feeds the store and decide whether manual changes go back to the ERP.
+3. Stock: pick the ERP warehouse that store orders are taken from and decide whether manual stock changes go back to the ERP.
 4. Newsletter: offer a signup checkbox at checkout and a shortcode form, with double opt-in through the ERP.
 5. Log: the last sends to the ERP with their result, to diagnose problems at a glance.
 
 == Changelog ==
+
+= 1.3.0 =
+* Manual stock changes are sent to the ERP as the amount that changed (+3, −2) instead of the new value, so a sale made in the ERP that the store has not received yet is never overwritten.
+* Stock changes the ERP does not accept are retried automatically (1, 5, 15, 60 and 180 minutes), each with its own ID so the ERP applies it only once.
+* Needs an up-to-date Nimbus ERP.
 
 = 1.2.2 =
 * Stock changes sent to the ERP carry the time they were read, so a late or retried update can no longer overwrite a newer stock value.
@@ -118,12 +125,15 @@ No. Version 1.2.0 copies the connection, warehouse and send log of the old plugi
 
 = 1.1.0 =
 * Newsletter: optional checkbox at checkout (classic and block checkout) and the `[codegea_erp_newsletter]` signup form shortcode, both with double opt-in through the ERP.
-* Orders now include the coupons used and their discount, so the ERP can count coupon uses (Loyalty plugin). Coupons created in the ERP are added to WooCommerce through its REST API.
+* Orders now include the coupons used and their discount, so the ERP can count coupon uses (Loyalty plugin).
 
 = 1.0.0 =
 * First release: orders (draft, confirm, invoice), stock in both directions, connection test, warehouse selection and send log.
 
 == Upgrade Notice ==
+
+= 1.3.0 =
+Manual stock changes are now sent as differences and retried until the ERP accepts them. Update Nimbus ERP first.
 
 = 1.2.0 =
 The plugin is now called Nimbus ERP for WooCommerce. If you had «Codegea ERP» installed, activate this one: your settings are copied over and you can delete the old plugin.
