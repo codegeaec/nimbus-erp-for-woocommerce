@@ -101,6 +101,42 @@ final class Nimbus_ERP_Orders {
 	}
 
 	/**
+	 * Dirección de envío para despachar el pedido desde el ERP; sin dirección de envío, la de facturación.
+	 * La provincia va con su nombre (no el código de WooCommerce).
+	 */
+	private static function shipping_address(WC_Order $order) {
+		$use_shipping = $order->get_shipping_address_1() !== '';
+		$get = function ($field) use ($order, $use_shipping) {
+			$method = ($use_shipping ? 'get_shipping_' : 'get_billing_') . $field;
+			return method_exists($order, $method) ? (string) $order->$method() : '';
+		};
+		$country = $get('country');
+		$state = $get('state');
+		$states = $country !== '' ? WC()->countries->get_states($country) : array();
+		$phone = $get('phone');
+		return array(
+			'name' => trim($get('first_name') . ' ' . $get('last_name')),
+			'company' => $get('company'),
+			'address_1' => $get('address_1'),
+			'address_2' => $get('address_2'),
+			'city' => $get('city'),
+			'state' => is_array($states) && isset($states[$state]) ? html_entity_decode($states[$state]) : $state,
+			'postcode' => $get('postcode'),
+			'country' => $country,
+			'phone' => $phone !== '' ? $phone : $order->get_billing_phone(),
+		);
+	}
+
+	/** Primer método de envío del pedido (`local_pickup` / `pickup_location` = retiro en tienda). */
+	private static function shipping_method(WC_Order $order) {
+		foreach ($order->get_shipping_methods() as $item) {
+			/** @var WC_Order_Item_Shipping $item */
+			return array('id' => (string) $item->get_method_id(), 'title' => (string) $item->get_method_title());
+		}
+		return null;
+	}
+
+	/**
 	 * Formato que espera el ERP (`POST /api/plugins/wordpress/webhook/orders`). Montos sin impuestos y la tasa
 	 * que cobró la tienda por línea, para que la venta del ERP sume lo mismo que pagó el cliente.
 	 */
@@ -146,7 +182,12 @@ final class Nimbus_ERP_Orders {
 			'total' => (float) $order->get_total(),
 			'notes' => $order->get_customer_note(),
 			'coupons' => self::coupons($order),
+			'shipping_address' => self::shipping_address($order),
 		);
+		$method = self::shipping_method($order);
+		if ($method) {
+			$payload['shipping_method'] = $method;
+		}
 		$warehouse = (int) Nimbus_ERP_Settings::get('warehouse_id');
 		if ($warehouse > 0) {
 			$payload['warehouse_id'] = $warehouse;
