@@ -43,7 +43,8 @@ Todas las llamadas son `POST {ERP}/api/plugins/wordpress/webhook/<endpoint>` con
 
 - `ping` → `{ company, tenant, warehouses[{ id, code, name, is_main }], stock_warehouse_id, orders_require_review, newsletter }`
 - `orders` → ver `Nimbus_ERP_Orders::payload()` (montos sin impuestos + tasa cobrada por línea, total del pedido,
-  `order_mode`, `warehouse_id`, `coupons: [{ code, discount }]` para que Fidelidad cuente los usos).
+  `order_mode`, `warehouse_id`, `coupons: [{ code, discount }]` para que Fidelidad cuente los usos,
+  `shipping_address` y `shipping_method: { id, title }` para despachar el pedido o preparar el retiro en tienda).
 - `stock` → `{ items: [{ sku, delta, change_id }], warehouse_id }` → `{ ok, updated, replayed[], skipped[] }`. `delta`
   es cuánto cambió (de 5 a 8 es `3`) y el ERP lo suma a su stock: no pisa lo que el ERP movió mientras tanto.
   `change_id` (UUID) es uno por cambio y se repite en los reintentos: el ERP no aplica dos veces el mismo. Las
