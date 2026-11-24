@@ -5,7 +5,7 @@ Requires at least: 6.4
 Tested up to: 7.1
 Requires PHP: 7.4
 Requires Plugins: woocommerce
-Stable tag: 1.3.0
+Stable tag: 1.4.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -108,6 +108,10 @@ No. Version 1.2.0 copies the connection, warehouse and send log of the old plugi
 5. Log: the last sends to the ERP with their result, to diagnose problems at a glance.
 
 == Changelog ==
+
+= 1.4.0 =
+* Orders carry the shipping address and the shipping method, so the ERP can dispatch them (or prepare a store pickup) and print the shipping label.
+* When the ERP ships or delivers an order, the customer gets an order note with the tracking number and the order is completed.
 
 = 1.3.0 =
 * Manual stock changes are sent to the ERP as the amount that changed (+3, −2) instead of the new value, so a sale made in the ERP that the store has not received yet is never overwritten.
