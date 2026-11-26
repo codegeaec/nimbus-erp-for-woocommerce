@@ -57,7 +57,7 @@ The settings screens are in Spanish.
 This plugin connects to the **Nimbus ERP** instance configured by the store owner (WooCommerce → Nimbus ERP → Conexión). Nothing is sent until an ERP address and secret are saved.
 
 * **What is sent and when**
-  * When an order reaches one of the selected statuses: order number, status, payment method, currency, billing name, email, phone and tax ID, line items (SKU, quantity, prices, discount, tax rate), coupons used, shipping and total, and the customer note.
+  * When an order reaches one of the selected statuses: order number, status, payment method, currency, billing name, email, phone and tax ID, line items (SKU, quantity, prices, discount, tax rate), coupons used, shipping cost and total, the shipping method, the shipping address (name, company, address, city, state, postcode, country and phone; the billing address when the order has no shipping address), and the customer note.
   * When stock is changed by hand in WooCommerce (only if enabled): product SKU, how much the stock changed and a random ID for that change.
   * When a customer ticks the newsletter checkbox at checkout or submits the newsletter form (only if used): email, name, the consent text they accepted and their IP address.
   * When testing the connection: the store URL and the plugin version.
@@ -111,7 +111,7 @@ No. Version 1.2.0 copies the connection, warehouse and send log of the old plugi
 
 = 1.4.0 =
 * Orders carry the shipping address and the shipping method, so the ERP can dispatch them (or prepare a store pickup) and print the shipping label.
-* When the ERP ships or delivers an order, the customer gets an order note with the tracking number and the order is completed.
+* Works with Nimbus ERP shipping: when the ERP ships or delivers an order, it adds an order note with the tracking number and completes the order through the WooCommerce REST API (this is done by the ERP, not by this plugin).
 
 = 1.3.0 =
 * Manual stock changes are sent to the ERP as the amount that changed (+3, −2) instead of the new value, so a sale made in the ERP that the store has not received yet is never overwritten.
